@@ -89,9 +89,6 @@
               runHook postInstall
             '';
 
-            # Prevent automatic icon cache generation
-            dontDropIconThemeCache = true;
-
             meta = with pkgs.lib; {
               description = "Mac OS 9 Classic-inspired icon theme";
               homepage = "https://github.com/diinkii/linux-retroism";
@@ -147,17 +144,7 @@
           };
 
           config = mkIf cfg.enable {
-            environment.systemPackages =
-              [ cfg.package ]
-              ++ (optionals cfg.enableIcons [
-                (pkgs.hicolor-icon-theme.overrideAttrs (old: {
-                  propagatedBuildInputs = [ cfg.iconPackage ];
-                  installPhase = ''
-                    mkdir -p $out
-                    ln -s ${cfg.iconPackage}/share $out/share
-                  '';
-                }))
-              ]);
+            environment.systemPackages = [ cfg.package ] ++ (optionals cfg.enableIcons [ cfg.iconPackage ]);
 
             environment.sessionVariables = {
               GTK_THEME = "ClassicPlatinumStreamlined";
