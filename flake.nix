@@ -54,6 +54,8 @@
 
             src = ./icon_theme;
 
+            nativeBuildInputs = [ pkgs.gtk3 ];
+
             dontBuild = true;
             dontConfigure = true;
 
@@ -62,10 +64,14 @@
 
               mkdir -p $out/share/icons
 
-              cp -Lrp RetroismIcons $out/share/icons/ 2>/dev/null || {
-                cp -rp RetroismIcons $out/share/icons/
-                find $out/share/icons/RetroismIcons -type l ! -exec test -e {} \; -delete
-              }
+              # Copy icon theme
+              cp -rp RetroismIcons $out/share/icons/
+
+              # Remove broken symlinks
+              find $out/share/icons/RetroismIcons -type l ! -exec test -e {} \; -delete
+
+              # Update icon cache
+              gtk-update-icon-cache -f -t $out/share/icons/RetroismIcons 2>/dev/null || true
 
               runHook postInstall
             '';
