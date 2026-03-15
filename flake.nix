@@ -62,18 +62,32 @@
 
               mkdir -p $out/share/icons
 
-              # Copy icon theme, dereferencing symlinks where possible
-              cp -rp RetroismIcons $out/share/icons/
+              # Copy icon theme with dereferenced symlinks
+              echo "Copying icon theme and resolving symlinks..."
+              cp -rL RetroismIcons $out/share/icons/ 2>/dev/null || {
+                # If -L fails due to broken symlinks, copy normally then fix
+                cp -r RetroismIcons $out/share/icons/
 
-              # Remove all broken symlinks to prevent icon cache errors
-              echo "Cleaning broken symlinks..."
-              find $out/share/icons/RetroismIcons -xtype l -delete
+                # Find and fix broken symlinks
+                cd $out/share/icons/RetroismIcons
+                find . -type l | while read -r link; do
+                  target=$(readlink "$link")
+                  linkdir=$(dirname "$link")
+
+                  # Try to resolve the target
+                  if [ -e "$linkdir/$target" ]; then
+                    # Target exists, copy it
+                    rm "$link"
+                    cp "$linkdir/$target" "$link"
+                  else
+                    # Target doesn't exist, remove the broken symlink
+                    rm "$link"
+                  fi
+                done
+              }
 
               runHook postInstall
             '';
-
-            # Don't generate icon cache - let the system handle it
-            dontDropIconThemeCache = true;
 
             meta = with pkgs.lib; {
               description = "Mac OS 9 Classic-inspired icon theme";
