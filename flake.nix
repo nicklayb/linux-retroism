@@ -97,7 +97,7 @@
             };
           };
 
-          default = pkgs.buildEnv {
+          default = pkgs.symlinkJoin {
             name = "linux-retroism";
             paths = [
               self.packages.${system}.gtk-theme
