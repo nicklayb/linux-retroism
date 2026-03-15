@@ -144,7 +144,17 @@
           };
 
           config = mkIf cfg.enable {
-            environment.systemPackages = [ cfg.package ] ++ (optionals cfg.enableIcons [ cfg.iconPackage ]);
+            environment.systemPackages =
+              [ cfg.package ]
+              ++ (optionals cfg.enableIcons [
+                (pkgs.hicolor-icon-theme.overrideAttrs (old: {
+                  propagatedBuildInputs = [ cfg.iconPackage ];
+                  installPhase = ''
+                    mkdir -p $out
+                    ln -s ${cfg.iconPackage}/share $out/share
+                  '';
+                }))
+              ]);
 
             environment.sessionVariables = {
               GTK_THEME = "ClassicPlatinumStreamlined";
