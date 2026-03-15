@@ -54,8 +54,6 @@
 
             src = ./icon_theme;
 
-            nativeBuildInputs = [ pkgs.gtk3 ];
-
             dontBuild = true;
             dontConfigure = true;
 
@@ -64,17 +62,18 @@
 
               mkdir -p $out/share/icons
 
-              # Copy icon theme
+              # Copy icon theme, dereferencing symlinks where possible
               cp -rp RetroismIcons $out/share/icons/
 
-              # Remove broken symlinks
-              find $out/share/icons/RetroismIcons -type l ! -exec test -e {} \; -delete
-
-              # Update icon cache
-              gtk-update-icon-cache -f -t $out/share/icons/RetroismIcons 2>/dev/null || true
+              # Remove all broken symlinks to prevent icon cache errors
+              echo "Cleaning broken symlinks..."
+              find $out/share/icons/RetroismIcons -xtype l -delete
 
               runHook postInstall
             '';
+
+            # Don't generate icon cache - let the system handle it
+            dontDropIconThemeCache = true;
 
             meta = with pkgs.lib; {
               description = "Mac OS 9 Classic-inspired icon theme";
