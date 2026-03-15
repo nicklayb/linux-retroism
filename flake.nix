@@ -61,7 +61,11 @@
               runHook preInstall
 
               mkdir -p $out/share/icons
-              cp -r RetroismIcons $out/share/icons/
+
+              cp -Lrp RetroismIcons $out/share/icons/ 2>/dev/null || {
+                cp -rp RetroismIcons $out/share/icons/
+                find $out/share/icons/RetroismIcons -type l ! -exec test -e {} \; -delete
+              }
 
               runHook postInstall
             '';
@@ -134,7 +138,8 @@
                 settings = {
                   "org/gnome/desktop/interface" = {
                     gtk-theme = "ClassicPlatinumStreamlined";
-                  } // (optionalAttrs cfg.enableIcons {
+                  }
+                  // (optionalAttrs cfg.enableIcons {
                     icon-theme = "RetroismIcons";
                   });
                 };
