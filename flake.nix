@@ -89,6 +89,9 @@
               runHook postInstall
             '';
 
+            # Prevent automatic icon cache generation
+            dontDropIconThemeCache = true;
+
             meta = with pkgs.lib; {
               description = "Mac OS 9 Classic-inspired icon theme";
               homepage = "https://github.com/diinkii/linux-retroism";
